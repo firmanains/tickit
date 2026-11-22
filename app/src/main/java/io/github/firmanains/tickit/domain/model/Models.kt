@@ -6,6 +6,7 @@ import java.time.LocalTime
 data class Habit(
     val id: Long,
     val name: String,
+    val emoji: String,
     val reminder: LocalTime?,
     val colorIndex: Int,
     val createdOn: LocalDate,
@@ -46,4 +47,4 @@ data class HabitDetail(
     val journal: List<CheckIn>, // newest first
 )
 
-data class ShameEntry(val habitName: String, val date: LocalDate, val reason: String)
+data class ShameEntry(val habitName: String, val habitEmoji: String, val date: LocalDate, val reason: String)

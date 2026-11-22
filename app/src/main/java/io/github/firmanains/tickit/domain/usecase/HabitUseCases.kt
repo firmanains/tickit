@@ -49,10 +49,10 @@ class ObserveHabitDetailUseCase(private val repo: HabitRepository) {
 }
 
 class AddHabitUseCase(private val repo: HabitRepository, private val scheduler: ReminderScheduler) {
-    suspend operator fun invoke(name: String, reminder: LocalTime?, colorIndex: Int, today: LocalDate) {
+    suspend operator fun invoke(name: String, emoji: String, reminder: LocalTime?, colorIndex: Int, today: LocalDate) {
         val clean = name.trim()
         require(clean.isNotEmpty()) { "Habit name is blank" }
-        scheduler.scheduleHabit(repo.add(clean, reminder, colorIndex, today))
+        scheduler.scheduleHabit(repo.add(clean, emoji, reminder, colorIndex, today))
     }
 }
 

@@ -12,7 +12,7 @@ interface HabitRepository {
     fun observeCheckIns(): Flow<List<CheckIn>>
     fun observeShame(): Flow<List<ShameEntry>>
     suspend fun activeHabits(): List<Habit>
-    suspend fun add(name: String, reminder: LocalTime?, colorIndex: Int, createdOn: LocalDate): Habit
+    suspend fun add(name: String, emoji: String, reminder: LocalTime?, colorIndex: Int, createdOn: LocalDate): Habit
 
     /** Soft delete: the habit disappears but its Wall of Shame history stays. */
     suspend fun archive(id: Long)

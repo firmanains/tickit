@@ -3,6 +3,7 @@ package io.github.firmanains.tickit.domain
 import io.github.firmanains.tickit.domain.model.CheckIn
 import io.github.firmanains.tickit.domain.model.DayStatus
 import io.github.firmanains.tickit.domain.model.HabitStats
+import io.github.firmanains.tickit.domain.model.HabitToday
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -48,6 +49,13 @@ fun dayStatus(history: Map<LocalDate, CheckIn>, createdOn: LocalDate, today: Loc
         !date.isBefore(today) || date.isBefore(createdOn) -> DayStatus.NONE // today is still open
         else -> DayStatus.MISSED
     }
+}
+
+/** Share of the habits that existed on [date] and were ticked that day; null when none existed yet. */
+fun dayProgress(habits: List<HabitToday>, date: LocalDate): Float? {
+    val existing = habits.filter { !it.habit.createdOn.isAfter(date) }
+    if (existing.isEmpty()) return null
+    return existing.count { it.history[date]?.done == true }.toFloat() / existing.size
 }
 
 fun stats(history: Map<LocalDate, CheckIn>, createdOn: LocalDate, today: LocalDate): HabitStats {

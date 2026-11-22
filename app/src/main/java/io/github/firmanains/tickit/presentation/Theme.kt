@@ -25,6 +25,17 @@ object Chalk {
     val RedPen = Color(0xFFFF6B5E)
 }
 
+/** Things pinned to the board: sticky notes for excuses, polaroids for proof photos. */
+object Paper {
+    val Sticky = Color(0xFFFFEE9C)
+    val Polaroid = Color(0xFFF6F3EA)
+    val Ink = Color(0xFF2A2A2A)
+    val RedInk = Color(0xFFC42E20)
+}
+
+/** Preset habit emojis offered when creating a habit. */
+val habitEmojis = listOf("🏃", "📚", "💧", "🧘", "💪", "🥗", "😴", "✍️", "🎸", "💻", "🧹", "🚭", "🙏", "🦷", "🌅", "💊")
+
 /** Chalk pastels a habit can be drawn in; stored as an index so the domain stays UI-free. */
 val habitColors = listOf(
     Color(0xFFF7D154), Color(0xFFF28B82), Color(0xFF7DD3A8), Color(0xFF7CC4F2),
@@ -39,6 +50,10 @@ private fun display(weight: Int) =
 
 /** Condensed scoreboard face for numbers, times and titles; body text stays system Roboto. */
 val Scoreboard = FontFamily(display(500), display(700), display(800))
+
+/** Handwriting is reserved for words the user wrote: proof notes and excuses. */
+val Handwriting = FontFamily(Font(R.font.patrick_hand))
+val HandStyle = TextStyle(fontFamily = Handwriting, fontSize = 20.sp, lineHeight = 24.sp)
 
 private val typography = Typography().run {
     copy(

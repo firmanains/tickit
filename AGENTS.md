@@ -18,7 +18,7 @@ Guidance for AI coding agents working on Tickit. Read this before changing code.
 
 ## Data rules
 
-- Room schema is version 1 and the app is installed on real phones. Any schema change needs a version bump and a `Migration`; never use destructive fallback.
+- Room schema is version 2 (`MIGRATION_1_2` adds `habits.emoji`) and the app is installed on real phones. Any schema change needs a version bump and a `Migration` registered in `AppContainer`; never use destructive fallback. Verify on an emulator by installing over a database of the previous version.
 - A check-in is one row per habit per day: `done = 1` holds proof (`note` required, `photoPath` optional); `done = 0` holds `reason` and is a Wall of Shame entry.
 - Habits are soft-deleted (`archived = 1`) so the Wall of Shame keeps its history.
 - `RoomHabitRepository` owns photo cleanup: replacing or clearing a check-in deletes the photo it no longer references. Photos live in `filesDir/proofs`, are shrunk on save, and are excluded from backup (`res/xml/*backup*`).
@@ -33,9 +33,12 @@ Guidance for AI coding agents working on Tickit. Read this before changing code.
 
 ## UI
 
-- Colours and type come from `presentation/Theme.kt` (`Chalk` tokens, `habitColors`, the `Scoreboard` font for display styles only). Use `MaterialTheme` roles, not hard-coded colours, except for the tile and red-pen semantics.
+- Colours and type come from `presentation/Theme.kt`: `Chalk` tokens, `Paper` tokens (sticky notes, polaroids), `habitColors`, `habitEmojis`. Use `MaterialTheme` roles, not hard-coded colours, except for tile, red-pen and paper semantics.
+- Three type roles: `Scoreboard` (Big Shoulders Display) for display styles, numbers and the alarm clock; `HandStyle` (Patrick Hand) **only** for words the user wrote (proof notes, excuses); system Roboto for everything else.
+- Shared playful pieces live in `common/Playful.kt` (`EmojiBadge`, `ProgressRing`, `Polaroid`, `tiltFor`, `dashedOutline`). Reuse them instead of re-drawing.
+- Motion answers user actions (ring fills, tick pop and burst). The alarm screen's emoji wiggle is the only motion that runs on its own; don't add idle animations elsewhere.
 - Screens not inside a `Scaffold` must sit in a `Surface`, or text falls back to black on the dark board.
-- The tile grid (`common/TileGrid.kt`) is the visual hero. Keep other screens quiet.
+- README screenshots get new file names when they change; GitHub caches images by path.
 - Accessibility: 48dp touch targets, a `contentDescription` that names the action, `semantics { heading() }` on screen titles.
 
 ## Verify

@@ -9,12 +9,15 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Upsert
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "habits")
 data class HabitEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
+    val emoji: String,
     val reminderMinute: Int?, // minute of day, null = no alarm
     val colorIndex: Int,
     val createdEpochDay: Long,
@@ -35,7 +38,7 @@ data class CheckInEntity(
     val photoPath: String?,
 )
 
-data class ShameRow(val name: String, val epochDay: Long, val reason: String?)
+data class ShameRow(val name: String, val emoji: String, val epochDay: Long, val reason: String?)
 
 @Dao
 interface HabitDao {
@@ -66,13 +69,20 @@ interface HabitDao {
 
     // No archived filter: deleting a habit doesn't wipe your shame.
     @Query(
-        "SELECT h.name AS name, c.epochDay AS epochDay, c.reason AS reason FROM check_ins c " +
+        "SELECT h.name AS name, h.emoji AS emoji, c.epochDay AS epochDay, c.reason AS reason FROM check_ins c " +
             "JOIN habits h ON h.id = c.habitId WHERE c.done = 0 ORDER BY c.epochDay DESC, h.name",
     )
     fun observeShame(): Flow<List<ShameRow>>
 }
 
-@Database(entities = [HabitEntity::class, CheckInEntity::class], version = 1, exportSchema = false)
+@Database(entities = [HabitEntity::class, CheckInEntity::class], version = 2, exportSchema = false)
 abstract class TickitDatabase : RoomDatabase() {
     abstract fun habitDao(): HabitDao
+}
+
+/** v2 adds a per-habit emoji; existing habits get a sparkle until edited. */
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE habits ADD COLUMN emoji TEXT NOT NULL DEFAULT '✨'")
+    }
 }

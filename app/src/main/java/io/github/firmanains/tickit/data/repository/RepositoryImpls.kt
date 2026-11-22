@@ -20,14 +20,15 @@ class RoomHabitRepository(private val dao: HabitDao, private val photos: LocalPh
     override fun observeCheckIns() = dao.observeCheckIns().map { rows -> rows.map { it.toDomain() } }
 
     override fun observeShame() = dao.observeShame().map { rows ->
-        rows.map { ShameEntry(it.name, LocalDate.ofEpochDay(it.epochDay), it.reason.orEmpty()) }
+        rows.map { ShameEntry(it.name, it.emoji, LocalDate.ofEpochDay(it.epochDay), it.reason.orEmpty()) }
     }
 
     override suspend fun activeHabits() = dao.activeHabits().map { it.toDomain() }
 
-    override suspend fun add(name: String, reminder: LocalTime?, colorIndex: Int, createdOn: LocalDate): Habit {
+    override suspend fun add(name: String, emoji: String, reminder: LocalTime?, colorIndex: Int, createdOn: LocalDate): Habit {
         val entity = HabitEntity(
             name = name,
+            emoji = emoji,
             reminderMinute = reminder?.let { it.hour * 60 + it.minute },
             colorIndex = colorIndex,
             createdEpochDay = createdOn.toEpochDay(),
@@ -57,6 +58,7 @@ class RoomHabitRepository(private val dao: HabitDao, private val photos: LocalPh
 private fun HabitEntity.toDomain() = Habit(
     id = id,
     name = name,
+    emoji = emoji,
     reminder = reminderMinute?.let { LocalTime.of(it / 60, it % 60) },
     colorIndex = colorIndex,
     createdOn = LocalDate.ofEpochDay(createdEpochDay),

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import io.github.firmanains.tickit.alarm.AlarmNotifier
 import io.github.firmanains.tickit.alarm.AndroidReminderScheduler
+import io.github.firmanains.tickit.data.local.MIGRATION_1_2
 import io.github.firmanains.tickit.data.local.TickitDatabase
 import io.github.firmanains.tickit.data.photo.LocalPhotoStore
 import io.github.firmanains.tickit.data.repository.PrefsSettingsRepository
@@ -33,7 +34,7 @@ import kotlinx.coroutines.SupervisorJob
 class AppContainer(context: Context) {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private val db = Room.databaseBuilder(context, TickitDatabase::class.java, "tickit.db").build()
+    private val db = Room.databaseBuilder(context, TickitDatabase::class.java, "tickit.db").addMigrations(MIGRATION_1_2).build()
     private val photos = LocalPhotoStore(context)
     private val habits: HabitRepository = RoomHabitRepository(db.habitDao(), photos)
     private val settings: SettingsRepository = PrefsSettingsRepository(context)

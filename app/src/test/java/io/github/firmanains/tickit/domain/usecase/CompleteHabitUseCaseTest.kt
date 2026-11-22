@@ -20,7 +20,7 @@ class CompleteHabitUseCaseTest {
         override fun observeCheckIns() = emptyFlow<List<CheckIn>>()
         override fun observeShame() = emptyFlow<List<ShameEntry>>()
         override suspend fun activeHabits() = emptyList<Habit>()
-        override suspend fun add(name: String, reminder: LocalTime?, colorIndex: Int, createdOn: LocalDate): Habit = error("unused")
+        override suspend fun add(name: String, emoji: String, reminder: LocalTime?, colorIndex: Int, createdOn: LocalDate): Habit = error("unused")
         override suspend fun archive(id: Long) = Unit
         override suspend fun setCheckIn(checkIn: CheckIn) { saved += checkIn }
         override suspend fun clearCheckIn(habitId: Long, date: LocalDate) = Unit

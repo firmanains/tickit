@@ -67,7 +67,8 @@ class HomeViewModel(
         today.value = LocalDate.now()
     }
 
-    fun add(name: String, reminder: LocalTime?, colorIndex: Int) = launch { addHabit(name, reminder, colorIndex, today.value) }
+    fun add(name: String, emoji: String, reminder: LocalTime?, colorIndex: Int) =
+        launch { addHabit(name, emoji, reminder, colorIndex, today.value) }
 
     fun delete(habitId: Long) = launch { deleteHabit(habitId) }
 

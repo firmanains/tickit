@@ -2,7 +2,10 @@ package io.github.firmanains.tickit.domain
 
 import io.github.firmanains.tickit.domain.model.CheckIn
 import io.github.firmanains.tickit.domain.model.DayStatus
+import io.github.firmanains.tickit.domain.model.Habit
 import io.github.firmanains.tickit.domain.model.HabitStats
+import io.github.firmanains.tickit.domain.model.HabitToday
+import io.github.firmanains.tickit.domain.model.TodayStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.DayOfWeek
@@ -43,4 +46,19 @@ class TilesTest {
 
     @Test fun statsOnDayOneWithNothingJudgedIsZero() =
         assertEquals(HabitStats(0, 0, 0), stats(emptyMap(), today, today))
+
+    @Test fun dayProgressCountsOnlyHabitsThatExisted() {
+        fun habit(id: Long, createdOn: LocalDate, history: Map<LocalDate, CheckIn>) = HabitToday(
+            Habit(id, "h$id", "✨", null, 0, createdOn), TodayStatus.PENDING, 0, null, history,
+        )
+        val yesterday = today.minusDays(1)
+        val habits = listOf(
+            habit(1, created, mapOf(yesterday to CheckIn(1, yesterday, done = true))),
+            habit(2, created, mapOf(yesterday to CheckIn(2, yesterday, done = false, reason = "hujan"))),
+            habit(3, today, emptyMap()), // created today: not counted for yesterday
+        )
+        assertEquals(0.5f, dayProgress(habits, yesterday))
+        assertEquals(0f, dayProgress(habits, today))
+        assertEquals(null, dayProgress(habits, created.minusDays(1)))
+    }
 }

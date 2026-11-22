@@ -6,23 +6,27 @@ Inspired by the TickOff habit tracker, rebuilt with Kotlin and Jetpack Compose u
 
 ## Screenshots
 
-| Today (tiles) | Compact, last 7 days | Habit detail | Proof journal |
-|:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/home.png" width="200"> | <img src="docs/screenshots/compact.png" width="200"> | <img src="docs/screenshots/detail.png" width="200"> | <img src="docs/screenshots/journal.png" width="200"> |
-| **Adding proof** | **Alarm** | **Wall of Shame** | |
-| <img src="docs/screenshots/proof.png" width="200"> | <img src="docs/screenshots/alarm.png" width="200"> | <img src="docs/screenshots/wall-of-shame.png" width="200"> | |
+| Today | Tick lands (chalk burst) | Compact, last 7 days |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/today-tiles.png" width="240"> | <img src="docs/screenshots/tick-burst.png" width="240"> | <img src="docs/screenshots/today-compact.png" width="240"> |
+| **Proof with a polaroid** | **Habit detail** | **Proof journal** |
+| <img src="docs/screenshots/proof-polaroid.png" width="240"> | <img src="docs/screenshots/habit-detail.png" width="240"> | <img src="docs/screenshots/proof-journal.png" width="240"> |
+| **Wall of Shame** | **Alarm** | **New habit** |
+| <img src="docs/screenshots/wall-of-shame-notes.png" width="240"> | <img src="docs/screenshots/alarm-ringing.png" width="240"> | <img src="docs/screenshots/add-habit.png" width="240"> |
 
 The screenshots use sample data.
 
 ## Features
 
+- **Today at a glance.** A progress ring shows how many habits are done today, a line of copy tells you where you stand ("Tinggal satu lagi. Gas!"), and a strip of seven rings shows how the past week went.
+- **Habits with personality.** Each habit has an emoji and a chalk colour, picked when you create it. Cards are tinted in the habit's colour.
 - **GitHub-style progress tiles.** Each habit gets a contribution grid: one column per week, Monday at the top, the current week on the right. A tile in the habit's colour means done, red means skipped with a reason, dark means missed. Today is outlined until you deal with it.
 - **Two layouts.** Tiles show months of history; compact shows every habit across the last seven days. Switch with the icon in the top right.
-- **Every tick needs proof.** A note on what you did is required; a camera photo is optional. Undoing a tick deletes its note and photo, after a confirmation.
-- **Habit detail.** Current streak, longest streak, consistency since the habit was created, a large tile grid with a legend, and a journal of every proof and excuse, newest first.
-- **Reminders are alarms.** Looping alarm sound, vibration, screen wake-up, and a full-screen alarm over the lock screen until you act. If the phone is in use, it shows as a heads-up notification instead.
+- **Every tick needs proof.** A note on what you did is required; a camera photo is optional and shows up as a polaroid. When the tick is saved, the check button pops and throws a small burst of chalk (with a haptic tap). Undoing a tick deletes its note and photo, after a confirmation.
+- **Habit detail.** Current streak, longest streak, consistency since the habit was created, a large tile grid with a legend, and a journal timeline of every proof (handwritten note plus polaroid) and excuse, newest first.
+- **Reminders are alarms.** Looping alarm sound, vibration, screen wake-up, and a full-screen alarm over the lock screen with a big clock and the habit's emoji wiggling until you act. If the phone is in use, it shows as a heads-up notification instead.
 - **Snooze.** 10 minutes, at most 3 times. After that the only options are proof or a reason.
-- **No progress means a reason.** Reasons go to the Wall of Shame, and deleting a habit doesn't remove them.
+- **No progress means a reason.** Reasons are pinned to the Wall of Shame as yellow sticky notes in red pen, along with the habit you excuse most often. Deleting a habit doesn't remove them.
 - **End-of-day review.** An alarm at a time you choose (default 21:00) listing whatever is still open. It only rings if something is.
 - **Alarms that survive.** Habits already dealt with stay quiet. Alarms are rescheduled after a reboot, a clock or time zone change, an app update, or a permission change.
 
@@ -37,18 +41,28 @@ Tickit is fully offline, so photos are kept in the **app's private storage on th
 
 ## Design
 
-The concept is a **blackboard**: a slate background, chalk-coloured text, a pastel chalk colour per habit, and red pen for excuses. The tile grid is the one loud element; everything else stays quiet.
+The concept is a **blackboard**, playful but tidy: a slate background, chalk-coloured text, a pastel chalk colour and an emoji per habit, and red pen for excuses. Things you wrote yourself are pinned to the board as paper: excuses on yellow sticky notes held by a strip of tape, proof photos as tilted polaroids.
 
 | Token | Hex | Used for |
 |---|---|---|
 | Board | `#17201C` | background |
-| Slate | `#212C27` | dialogs, navigation |
+| Slate | `#212C27` | cards, dialogs, navigation |
 | Chalk | `#EDEBE3` | primary text |
 | Dust | `#8C978F` | secondary text |
-| Alarm | `#FFB547` | primary actions, alarm clock |
-| Red pen | `#FF6B5E` | excuses, Wall of Shame |
+| Alarm | `#FFB547` | primary actions, progress, alarm clock |
+| Red pen | `#FF6B5E` | excuses on the board |
+| Sticky note | `#FFEE9C` + ink `#C42E20` | Wall of Shame notes |
+| Polaroid | `#F6F3EA` | proof photo frames |
 
-Type: **Big Shoulders Display**, a condensed scoreboard face, for dates, habit names, numbers and the alarm clock; the system's Roboto for body text. The font is licensed under SIL OFL 1.1, see [`licenses/`](licenses/).
+Type has three roles:
+
+- **Big Shoulders Display**, a condensed scoreboard face: dates, habit names, numbers, the alarm clock.
+- **Patrick Hand**, handwriting: only for words you wrote (proof notes and excuses), so your own voice is easy to spot.
+- The system's Roboto: everything else.
+
+Both fonts are licensed under SIL OFL 1.1, see [`licenses/`](licenses/).
+
+Motion answers what you do: rings fill when progress changes, and a tick pops and bursts. The only motion that runs on its own is the wiggling emoji on the alarm screen, whose job is to grab attention.
 
 ## Spec
 
@@ -56,7 +70,7 @@ Type: **Big Shoulders Display**, a condensed scoreboard face, for dates, habit n
 |---|---|
 | Language / UI | Kotlin 2.2, Jetpack Compose, Material 3 (custom dark theme) |
 | Architecture | MVVM + clean architecture (domain / data / presentation), one `UiState` per screen, manual DI |
-| Storage | Room 2.7 (SQLite), SharedPreferences for settings, private files for photos |
+| Storage | Room 2.7 (SQLite, schema v2 with a 1→2 migration), SharedPreferences for settings, private files for photos |
 | Images | Coil 3 (`AsyncImage`) |
 | Alarms | `AlarmManager.setAlarmClock` (exact, Doze-proof), `CATEGORY_ALARM` notification with `FLAG_INSISTENT` and a full-screen intent |
 | Camera | `ActivityResultContracts.TakePicture` + `FileProvider`, no `CAMERA` permission |
@@ -73,20 +87,20 @@ app/src/main/java/io/github/firmanains/tickit/
 │   ├── repository/         # HabitRepository, SettingsRepository, PhotoStore, ReminderScheduler interfaces
 │   ├── usecase/            # ObserveToday, ObserveHabitDetail, AddHabit, DeleteHabit, CompleteHabit,
 │   │                       # UndoCheckIn, Excuse, Snooze, RescheduleAll, SetEndOfDay
-│   └── Schedule.kt         # nextTrigger, streak, weekColumns, dayStatus, stats, AlarmPolicy
+│   └── Schedule.kt         # nextTrigger, streak, weekColumns, dayStatus, dayProgress, stats, AlarmPolicy
 ├── data/
-│   ├── local/              # Room entities, DAO, database
+│   ├── local/              # Room entities, DAO, database, migrations
 │   ├── photo/              # LocalPhotoStore: new path, shrink, delete
 │   └── repository/         # RoomHabitRepository (also cleans up replaced photos), PrefsSettingsRepository
 ├── alarm/                  # platform side: scheduler, notifier, receivers, PendingIntents
 ├── di/AppContainer.kt      # dependency wiring + ViewModel factories
 └── presentation/
-    ├── home/               # Today: tiles / compact, permission banners
-    ├── habit/              # detail: stats, large tiles, journal
-    ├── shame/              # Wall of Shame
+    ├── home/               # Today: progress ring, week strip, habit cards / compact grid, permission banners
+    ├── habit/              # detail: stats, large tiles, journal timeline
+    ├── shame/              # Wall of Shame sticky notes
     ├── alarm/              # AlarmActivity (full-screen)
-    ├── common/             # TileGrid, ProofDialog, ReasonDialog, time picker
-    └── Theme.kt            # colour tokens + typography
+    ├── common/             # TileGrid, Playful (EmojiBadge, ProgressRing, Polaroid), dialogs
+    └── Theme.kt            # colour and paper tokens, emojis, typography
 ```
 
 Dependencies point `presentation → domain ← data / alarm`. The domain layer knows nothing about Android.
@@ -109,7 +123,7 @@ Left alone, an alarm goes quiet after 10 minutes. The habit still shows up in th
 
 ### Data
 
-- `habits(id, name, reminderMinute?, colorIndex, createdEpochDay, archived)`: deleting is a soft delete (`archived = 1`)
+- `habits(id, name, emoji, reminderMinute?, colorIndex, createdEpochDay, archived)`: deleting is a soft delete (`archived = 1`). Schema v2 added `emoji`; the migration gives existing habits ✨.
 - `check_ins(habitId, epochDay, done, reason?, note?, photoPath?)`: one row per habit per day. `done = 1` holds the proof (`note`, `photoPath`); `done = 0` holds the `reason` and appears on the Wall of Shame.
 
 ## Build and install
@@ -137,8 +151,8 @@ The camera needs no permission: the system camera app takes the photo and writes
 
 ## Tests
 
-- Unit tests (`./gradlew testDebugUnitTest`): next alarm time, streaks, weekly tile layout, per-day status, stats (longest streak, consistency), and the rule that a tick needs a note.
-- Checked by hand on an Android 15 emulator: tiles and compact layout, ticking with a camera photo, the journal showing that photo, the end-of-day alarm from a locked screen, and adding proof from the alarm screen until the alarm stops.
+- Unit tests (`./gradlew testDebugUnitTest`): next alarm time, streaks, weekly tile layout, per-day status, daily progress for the week strip, stats (longest streak, consistency), and the rule that a tick needs a note.
+- Checked by hand on an Android 15 emulator: upgrading a schema v1 database with 4 habits and 281 check-ins to v2 without losing data, tiles and compact layout, the tick burst, ticking with a camera photo, polaroids in the journal, sticky notes on the Wall of Shame, the single-habit and end-of-day alarms from a locked screen, and adding proof from the alarm screen until the alarm stops.
 
 ## For AI agents
 

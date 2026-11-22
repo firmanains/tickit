@@ -5,15 +5,18 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,33 +25,39 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import io.github.firmanains.tickit.domain.model.Habit
 import io.github.firmanains.tickit.domain.model.Proof
+import io.github.firmanains.tickit.presentation.HandStyle
 import java.io.File
 import java.time.LocalTime
 
 /** "No progress" is only accepted with a written reason. */
 @Composable
-fun ReasonDialog(habitName: String, onDismiss: () -> Unit, onSubmit: (String) -> Unit) {
+fun ReasonDialog(habit: Habit, onDismiss: () -> Unit, onSubmit: (String) -> Unit) {
     var reason by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Kenapa $habitName nggak jalan?") },
+        title = { Text("Kenapa ${habit.emoji} ${habit.name} nggak jalan?") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Alasanmu dipajang di Wall of Shame.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OutlinedTextField(value = reason, onValueChange = { reason = it }, placeholder = { Text("Jujur aja") }, minLines = 2)
+                Text("Alasanmu ditempel di Wall of Shame.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedTextField(
+                    value = reason,
+                    onValueChange = { reason = it },
+                    placeholder = { Text("Jujur aja", style = HandStyle) },
+                    textStyle = HandStyle,
+                    minLines = 2,
+                )
             }
         },
-        confirmButton = { TextButton(onClick = { onSubmit(reason) }, enabled = reason.isNotBlank()) { Text("Pajang") } },
+        confirmButton = { TextButton(onClick = { onSubmit(reason) }, enabled = reason.isNotBlank()) { Text("Tempel") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Batal") } },
     )
 }
@@ -59,7 +68,7 @@ fun ReasonDialog(habitName: String, onDismiss: () -> Unit, onSubmit: (String) ->
  */
 @Composable
 fun ProofDialog(
-    habitName: String,
+    habit: Habit,
     newPhotoPath: () -> String,
     onDiscardPhoto: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -99,29 +108,41 @@ fun ProofDialog(
 
     AlertDialog(
         onDismissRequest = ::dismiss,
-        title = { Text("Bukti $habitName") },
+        title = { Text("${habit.emoji} Bukti ${habit.name}") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
                     label = { Text("Ngapain aja?") },
-                    placeholder = { Text("Lari 3 km keliling komplek") },
+                    placeholder = { Text("Lari 3 km keliling komplek", style = HandStyle) },
+                    textStyle = HandStyle,
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                photoPath?.let { path ->
-                    AsyncImage(
-                        model = ImageRequest.Builder(context).data(File(path)).crossfade(true).build(),
-                        contentDescription = "Foto bukti $habitName",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth().aspectRatio(4f / 3f).clip(RoundedCornerShape(12.dp)),
+                val photo = photoPath
+                if (photo == null) {
+                    Column(
+                        Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(16.dp))
+                            .dashedOutline(MaterialTheme.colorScheme.outline)
+                            .clickable(onClickLabel = "Ambil foto bukti", onClick = ::takePhoto),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text("📸", fontSize = 32.sp)
+                        Text("Tambah foto (opsional)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else {
+                    Polaroid(
+                        path = photo,
+                        caption = "hari ini",
+                        contentDescription = "Foto bukti ${habit.name}",
+                        tilt = -1.5f,
+                        modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.CenterHorizontally).padding(top = 4.dp),
                     )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = ::takePhoto) { Text(if (photoPath == null) "Ambil foto" else "Foto ulang") }
-                    photoPath?.let { path ->
-                        TextButton(onClick = { onDiscardPhoto(path); photoPath = null }) { Text("Hapus foto") }
+                    Row(Modifier.align(Alignment.CenterHorizontally)) {
+                        TextButton(onClick = ::takePhoto) { Text("Foto ulang") }
+                        TextButton(onClick = { onDiscardPhoto(photo); photoPath = null }) { Text("Hapus foto") }
                     }
                 }
                 if (noCamera) Text("Nggak ada app kamera di HP ini. Catatan aja cukup.", color = MaterialTheme.colorScheme.error)
