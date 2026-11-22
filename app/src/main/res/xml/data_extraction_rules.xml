@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+. Same rule: back up habits and check-ins, not the proof photos (25 MB cap). -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="proofs/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="proofs/" />
+    </device-transfer>
+</data-extraction-rules>

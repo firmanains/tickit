@@ -1,0 +1,11 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+
+# Local Claude Code / MCP config (machine-specific paths)
+.claude/
+.mcp.json
+CLAUDE.md

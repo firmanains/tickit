@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand">#FF17201C</color>
+    <!-- Always the blackboard; the window background avoids a white flash before Compose draws. -->
+    <style name="Theme.Tickit" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/brand</item>
+    </style>
+</resources>
