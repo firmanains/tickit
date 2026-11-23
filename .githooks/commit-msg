@@ -1,0 +1,11 @@
+#!/bin/sh
+# Rejects commits that don't follow the convention: <type>(<scope>)?: <summary>
+types='feat|fix|chore|view|docs|refactor|test'
+first_line=$(head -n 1 "$1")
+if printf '%s\n' "$first_line" | grep -Eq "^($types)(\([a-z0-9-]+\))?!?: .+" ||
+   printf '%s\n' "$first_line" | grep -Eq '^(Merge|Revert|fixup!|squash!) '; then
+  exit 0
+fi
+echo "Commit message must look like: feat(alarm): add snooze limit" >&2
+echo "Types: feat, fix, chore, view, docs, refactor, test" >&2
+exit 1

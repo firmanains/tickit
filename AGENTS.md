@@ -41,6 +41,32 @@ Guidance for AI coding agents working on Tickit. Read this before changing code.
 - README screenshots get new file names when they change; GitHub caches images by path.
 - Accessibility: 48dp touch targets, a `contentDescription` that names the action, `semantics { heading() }` on screen titles.
 
+## Git workflow
+
+- `main` is protected: no direct pushes, no force pushes, changes land only through a pull request.
+- Every feature or fix gets its own branch from an up-to-date `main`: `git switch main && git pull --ff-only`, then `git switch -c <type>/<short-name>` using one of the commit types below.
+- Commit there (author `firmanains@gmail.com`), push the branch, open a PR into `main`, squash-merge it, and delete the branch.
+- `gh` must be logged in as `firmanains`; the `firmanvalid` account on this machine has no write access to the repo.
+
+### Commit messages
+
+[Conventional Commits](https://www.conventionalcommits.org): `<type>(<scope>): <summary>`, summary in English, imperative, lowercase, no trailing period.
+
+| Type | For |
+|---|---|
+| `feat` | a new capability for the user |
+| `fix` | a bug fix |
+| `view` | visual or UI-only changes (layout, colours, type, motion, copy) |
+| `refactor` | code changes that don't change behaviour |
+| `test` | adding or fixing tests |
+| `docs` | README, AGENTS.md, comments |
+| `chore` | build, dependencies, tooling, repo setup |
+
+Scope is optional and lowercase, e.g. `alarm`, `home`, `shame`, `data`. Add `!` after the type for breaking changes (for example a schema change without a migration path).
+
+- PR titles follow the same format, because squash-merging turns the PR title into the commit on `main`.
+- `.githooks/commit-msg` rejects anything else. Enable it once per clone: `git config core.hooksPath .githooks`.
+
 ## Verify
 
 ```bash
